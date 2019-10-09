@@ -5,7 +5,7 @@ _Official implementation of the paper ["Bag of Samplings for Parkinson's Disease
 ## Reproducing the results
 
 1. Install the requirements with `pip install -r requirements.txt` (**requires Python 3.6**)
-2. Run `./data/get_handpd2.sh` to download the data from the [Recogna Laboratory](www.recogna.tech) servers
+2. Run `./data/get_handpd2.sh` to download the data from the [Recogna Laboratory](http://www.recogna.tech) servers
 3. The training protocols are based in the work by Afonso et al. `[1]`, in which two training regimes are considered: a) 50% of the data is used for training and 50% for testing b) 75% of the data is used for training and 25% for testing. In our case we need to validate the hyperparameters, hence we employ the data partitions in the table below. 
 
 | Training regime | Train | Validation | Test |
