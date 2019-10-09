@@ -1,0 +1,7 @@
+numpy>=1.15.0
+sklearn>=0.0
+matplotlib>=0.0
+tqdm>=4.31.1
+
+tensorflow==1.9.0 # you might want to use the conda installation instead of pip
+keras==2.2.0
