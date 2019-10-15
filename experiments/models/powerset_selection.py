@@ -11,13 +11,6 @@ from pathlib import Path
 
 import train_models
 
-import numpy as np
-from scipy import special
-from opytimizer.spaces.search import SearchSpace
-from opytimizer.optimizers import bha
-from opytimizer.core.function import Function
-from opytimizer import Opytimizer
-
 
 FIXED_NL = 2              # Amount of hidden layers
 FIXED_BD = True           # Replace GRU by biGRU
@@ -40,7 +33,7 @@ def fit_power_model(resolutions: List[int]) -> float:
         n_models=N_MODELS_ESTIMATION,
         dropout=FIXED_DROPOUT,
         resolutions=resolutions,
-        lenghts=[500] * len(resolutions),
+        lengths=[500] * len(resolutions),
         n_recurrent_layers=FIXED_NL,
         is_bidirectional=FIXED_BD,
         hidden_sz=FIXED_SZ,
