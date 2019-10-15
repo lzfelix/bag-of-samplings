@@ -80,9 +80,9 @@ def build_model(hidden_sz: int,
     bottom_inputs = list()
     bottom_outputs = list()
     
-    for input_id, (resolution, lenght) in enumerate(zip(resolutions, lengths)):
+    for input_id, (resolution, length) in enumerate(zip(resolutions, lengths)):
         # input part
-        signal_in, signal_drop = build_input(resolution, lenght)
+        signal_in, signal_drop = build_input(resolution, length)
         
         # RNN part
         loop_input = signal_drop
@@ -133,7 +133,7 @@ def train_models(exam: str,
         n_models: Amount of models to be trained.
         dropout: Amount of dropout applied between layers.
         resolutions: A list of sampling intervals that will form the BoS.
-        lengths: The lenght of each sub-signal. This list should have as
+        lengths: The length of each sub-signal. This list should have as
             many entries as resolutions. Note that each resolution can
             have a different length.
         n_recurrent_layers: Amount of RNN layers to form each 'input head'.

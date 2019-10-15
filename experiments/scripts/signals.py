@@ -1,6 +1,5 @@
 import sys
-import logging
-from typing import Tuple, List, Optional
+from typing import Tuple, List
 from collections import defaultdict
 
 import numpy as np
@@ -44,7 +43,7 @@ def mean_std(X: List[np.ndarray], channel: int) -> Pair:
     # Arguments
         X: List of timeseries tensors.
         channel: The desired channel to have the statistics computed
-    # Return
+    # Returns
         (avg, stddev)
     """
     accumulator = 0
@@ -55,7 +54,7 @@ def mean_std(X: List[np.ndarray], channel: int) -> Pair:
 
     avg = accumulator / lengths_sum
 
-    # stddev = sqrt(sum(samples[:, :, channel] - avg[channel]) / sum(lenghts))
+    # stddev = sqrt(sum(samples[:, :, channel] - avg[channel]) / sum(lengths))
     accumulator = 0
     for sample in X:
         diff = sample[:, channel] - avg
@@ -72,7 +71,7 @@ def min_max(X: np.ndarray, channel: int) -> Pair:
     # Arguments
         X: List of timeseries tensors.
         channel: The desired channel to have the statistics computed
-    # Return
+    # Returns
         (min, max - min)
     """
     channel_max = 0
@@ -92,7 +91,7 @@ def compute_series_stats(samples: List[np.ndarray],
     """Computes some statistics over samples using a provided function.
 
     # Arguments
-        samples: A list of timeseries with shape [? = n_timsteps, n_channels]
+        samples: A list of timeseries with shape [? = n_timsteps, n_channels].
         fun: A callable that takes all samples and computes some metrics over
             one of its channels. This function is sequentially over all channels
             of the samples.
@@ -111,11 +110,13 @@ def compute_series_stats(samples: List[np.ndarray],
 
 def normalize_multiseries(samples: List[np.ndarray],
                           statistics: List[Tuple[float, float]]) -> List[np.ndarray]:
-    """Normalizes all channels in multiseries with `(x[i, t, c] - mean[c]) / std[c])`.
+    """Normalizes all channels in multiseries with `(x[i, t, c] - a[c]) / b[c])`.
     # Arguments
-        multiseries: Tensor with shape [n_samples, n_timesteps, n_channels]
-        samples_lenghts: The lenght of multiseries[i,:,:] before padding it in the end
+        multiseries: Tensor with shape [n_samples, n_timesteps, n_channels].
+        statistics: A list of tuples (a, b) so that each normalized multiseries is
+            computed as `(x[i, t, c] - a[c]) / b[c])`.
     # Returns
+        normalized_sampels: samples after being normalized with statistcs.
     """
     # Copy because these operations happen inplace and the original tensor is needed.
     normalized_samples = list()
@@ -135,7 +136,7 @@ def sampling(sequence: np.ndarray, sampling_factor: int) -> np.ndarray:
     """Samples a timeseries at every sample_factor ms.
     
     # Arguments
-        sequence: Tensor with shape [n_timesteps, n_channels]
+        sequence: Tensor with shape `[n_timesteps, n_channels]`.
         sampling_factor: Samples sequence at every given ms. If sampling is negative,
             the sampling is performed from the end to the begining of the sequence.
     # Return
@@ -163,7 +164,7 @@ def equal_sampling(sequence: np.ndarray, resulting_seq_len: int) -> np.ndarray:
 
 def generate_sampled_signals(samples: List[np.ndarray],
                              sampling_factor: int,
-                             maxlen: int) -> np.ndarray:
+                             maxlen: int) -> Tuple[np.ndarray, List[int]]:
     """Samples all timeseries in signals_ at every sampling_factor ms.
     
     # Arguments
@@ -175,50 +176,44 @@ def generate_sampled_signals(samples: List[np.ndarray],
         strategy: ...
 
     # Returns
-        A tensor with shape [n_samples, maxlen, n_channels].
+        sampled: A tensor with shape [n_samples, maxlen, n_channels].
+        sampled_lengths: The length of each signal before padding
     """
     if sampling_factor != 0:
         sampled = [sampling(signal, sampling_factor) for signal in samples]
     else:
         sampled = [equal_sampling(signal, maxlen) for signal in samples]
 
-    sampled_lenghts = [min(len(signal), maxlen) for signal in sampled]
+    sampled_lengths = [min(len(signal), maxlen) for signal in sampled]
 
     sampled = sequence.pad_sequences(sampled,
                                      maxlen=maxlen,
                                      dtype='float32',
                                      padding='post',
                                      truncating='post')
-    return sampled, sampled_lenghts
-
-
-def torch_sampled_signals(samples: List[np.ndarray],
-                          sampling_factor: int,
-                          maxlen: int) -> np.ndarray:
-
-    sampled = [sampling(signal, sampling_factor)[:maxlen] for signal in samples]
-    sampled_lenghts = [len(signal) for signal in sampled]
-    return sampled, sampled_lenghts
+    return sampled, sampled_lengths
 
 
 def multires_sampling(x_trn: List[np.ndarray],
                       x_val: List[np.ndarray],
                       x_tst: List[np.ndarray],
                       resolutions: List[int],
-                      maxlens: List[int]) -> dict:
+                      maxlens: List[int]) -> Tuple[defaultdict, defaultdict]:
     """Samples train, validation and test signals using different resolutions.
     # Arguments
         x_trn: A list of timeseries samples without any previous sampling.
         x_val: A list of timeseries samples without any previous sampling.
         x_tst: A list of timeseries samples without any previous sampling.
         resolutions: A list of resolutions to perform samplings.
-        mexlens: For each resolution, the default lenght for its sampled versions.
+        mexlens: For each resolution, the default length for its sampled versions.
     # Returns
-        A dict with the following layout for train, validation and test sets:
+        `A` is a dict with the following layout for train, validation and test sets:
         ```python
             d['train'][f'res_{resolutions[i]}'] ->
                 np.ndarray with shape [n_samples, maxlen, n_channels]
         ```
+
+        `B` contains the length of each signal before padding.
     """
     assert len(resolutions) == len(maxlens)
     if resolutions[0] == 0 and len(resolutions) == 1:
@@ -228,7 +223,7 @@ def multires_sampling(x_trn: List[np.ndarray],
         print('xxx')
 
     bag_of_resolutions = defaultdict(dict)
-    bag_of_lenghts = defaultdict(dict)
+    bag_of_lengths = defaultdict(dict)
     for resolution, maxlen in zip(resolutions, maxlens):
         trn_samples, trn_lens = generate_sampled_signals(x_trn, resolution, maxlen)
         val_samples, val_lens = generate_sampled_signals(x_val, resolution, maxlen)
@@ -239,8 +234,8 @@ def multires_sampling(x_trn: List[np.ndarray],
         bag_of_resolutions['val'][res_name] = val_samples
         bag_of_resolutions['tst'][res_name] = tst_samples
 
-        bag_of_lenghts['trn'][res_name] = trn_lens
-        bag_of_lenghts['val'][res_name] = val_lens
-        bag_of_lenghts['tst'][res_name] = tst_lens
+        bag_of_lengths['trn'][res_name] = trn_lens
+        bag_of_lengths['val'][res_name] = val_lens
+        bag_of_lengths['tst'][res_name] = tst_lens
 
-    return bag_of_resolutions, bag_of_lenghts
+    return bag_of_resolutions, bag_of_lengths

@@ -1,5 +1,4 @@
 from keras import backend as K
-from keras import initializers
 from keras import regularizers
 from keras import constraints
 from keras.layers import Layer
@@ -210,4 +209,3 @@ class AttentionLayer(Layer):
 
         base_config = super().get_config()
         return dict(list(base_config.items()) + list(config.items()))
-

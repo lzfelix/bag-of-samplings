@@ -3,6 +3,7 @@ from collections import Counter
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def plot_sample(series: np.ndarray, create_fig: bool=True) -> None:
     """Plots all channels of a single timeseries."""
     if create_fig:

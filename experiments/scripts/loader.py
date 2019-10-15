@@ -102,24 +102,3 @@ def load_all_exams(root_folder: str, exam: str, sampling_factor: int) -> List[np
         exam_file = all_exams[i]
         all_exams_features.append(load_signal(exam_file, sampling_factor))
     return all_exams_features
-
-
-def pad_sequences(X: List[np.ndarray], maxlen: int) -> np.ndarray:
-    """Pads all timeseries in X to have maxlen lenght.
-    
-    # Returns
-        A tensor with shape [n_samples = len(X), maxlen]
-    """
-    from keras.preprocessing import sequence
-    return sequence.pad_sequences(X,
-                                  maxlen=maxlen,
-                                  dtype='float32',
-                                  padding='post',
-                                  truncating='post')
-
-
-def analyse(sequences: List[np.ndarray]) -> Tuple[float, float, float, float]:
-    """Given a list of timeseries, returns their (min, max, avg, std) lenght."""
-
-    all_lenghts = [entry.shape[0] for entry in sequences]
-    return np.min(all_lenghts), np.max(all_lenghts), np.average(all_lenghts), np.std(all_lenghts)
