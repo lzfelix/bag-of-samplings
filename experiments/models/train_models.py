@@ -11,7 +11,6 @@ sys.path.append('../')
 
 import numpy as np
 import sklearn
-from keras import backend as K
 from keras import optimizers
 from keras import callbacks
 from keras import layers

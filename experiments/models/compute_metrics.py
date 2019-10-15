@@ -14,8 +14,6 @@ def compute_metrics(data: Dict[str, np.ndarray],
                     partition: str) -> List[float]:
     predicted = (data[f'y_hat_{partition}'] >= 0.5).astype(int).flatten()
     ground = data[f'y_{partition}']
-    
-    
     tn, fp, fn, tp = metrics.confusion_matrix(ground, predicted).ravel()
     
     acc = (tp + tn) / (tp + tn + fp + fn)
@@ -24,8 +22,6 @@ def compute_metrics(data: Dict[str, np.ndarray],
     f1  = (2 * pre * rec) / (pre + rec)
     acc_hc = tn / (tn + fn)
     acc_pd = tp / (tp + fp)
-    # spe = tn / (tn + fp)
-    # sen = rec # Why use this metric?
     return [acc, pre, rec, f1, acc_hc, acc_pd]
 
 
