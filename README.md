@@ -15,7 +15,7 @@ _Official implementation of the paper ["Bag of Samplings for Parkinson's Disease
 | a (ours)        | 40%   | 10%        | 50%  |
 | b (ours)        | 65%   | 10%        | 25%  |
 
-These splits can be generated with the script `split.py` in `data/`. Since the random seed is fixed, the output of the script should always be the same. Nevertheless, the splits used in our experiments are detailed in the file `data_splits/py`.
+These splits can be generated with the script `split.py` in `data/`. Since the random seed is fixed, the output of the script should always be the same. Nevertheless, the splits used in our experiments are detailed in the file `data_splits.py`.
 
 4. You can reproduce the paper results using the script `models/train_models.py`. Running it with the `-h` option shows how to set the hyperparameters.
 5. If you wish to run the sampling interval powerset selection, use `models/poewrset_selection.py` the output of this script is persisted in the disk.
