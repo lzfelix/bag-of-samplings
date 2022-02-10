@@ -3,5 +3,5 @@ sklearn>=0.0
 matplotlib>=0.0
 tqdm>=4.31.1
 
-tensorflow==1.15.2 # you might want to use the conda installation instead of pip
+tensorflow==2.5.3 # you might want to use the conda installation instead of pip
 keras==2.2.0
